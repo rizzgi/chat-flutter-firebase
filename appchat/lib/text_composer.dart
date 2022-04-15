@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 class TextComposer extends StatefulWidget {
 
   TextComposer(this.sendMessage);
-  Function({String? text, File? imageFile}) sendMessage;
+  Function({String? text, XFile? imageFile}) sendMessage;
 
   @override
   State<TextComposer> createState() => _TextComposerState();
@@ -25,7 +25,7 @@ class _TextComposerState extends State<TextComposer> {
         children: [
           IconButton(onPressed: () async {
             print("entrou no icon");
-            final File imageFile = (await ImagePicker().pickImage(source: ImageSource.camera)) as File;
+            final XFile imageFile = (await ImagePicker().pickImage(source: ImageSource.camera)) as XFile;
             if(imageFile == null) return;
             widget.sendMessage(imageFile: imageFile);
             print("voltou no icon");

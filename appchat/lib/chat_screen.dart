@@ -1,7 +1,8 @@
+import 'dart:io';
+
 import 'package:appchat/text_composer.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -24,10 +25,19 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _sendMessage(String text) async{
+  void _sendMessage({String? text, File? imageFile}) async {
     await Firebase.initializeApp();
-    FirebaseDatabase.instance.ref("messages").set({"text": text});
+
+    if (imageFile != null) {
+      print("fire");
+      UploadTask task = FirebaseStorage.instance
+          .ref()
+          .child(DateTime.now().millisecondsSinceEpoch.toString()).putFile(imageFile);
+       TaskSnapshot taskSnapshot = task.snapshot;
+       String url = await taskSnapshot.ref.getDownloadURL();
+       print("url fire $url");
+    }
+
+    // FirebaseDatabase.instance.ref("messages").set({"text": text});
   }
-
-
 }

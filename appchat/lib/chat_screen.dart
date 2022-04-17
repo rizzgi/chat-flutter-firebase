@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:appchat/text_composer.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,20 +25,21 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _sendMessage({String? text, XFile? imageFile}) async {
-    await Firebase.initializeApp();
+  Future<void> _sendMessage({String? text, XFile? imageFile}) async {
 
     if (imageFile != null) {
-      print("fire");
-      UploadTask task = FirebaseStorage.instance
-          .ref()
+
+      Reference reference = FirebaseStorage.instance.ref();
+      UploadTask task = reference
           .child(DateTime.now().millisecondsSinceEpoch.toString())
           .putFile(File(imageFile.path));
       TaskSnapshot taskSnapshot = task.snapshot;
       String url = await taskSnapshot.ref.getDownloadURL();
-      print("url fire $url");
+
+      print("aqui o download link $url");
+
     }
 
-    // FirebaseDatabase.instance.ref("messages").set({"text": text});
+    FirebaseDatabase.instance.ref("messages").set({"text": text});
   }
 }

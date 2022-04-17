@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -24,11 +22,9 @@ class _TextComposerState extends State<TextComposer> {
       child: Row(
         children: [
           IconButton(onPressed: () async {
-            print("entrou no icon");
             final XFile imageFile = (await ImagePicker().pickImage(source: ImageSource.camera)) as XFile;
             if(imageFile == null) return;
             widget.sendMessage(imageFile: imageFile);
-            print("voltou no icon");
           }, icon: const Icon(Icons.photo_camera)),
           Expanded(
             child: TextField(

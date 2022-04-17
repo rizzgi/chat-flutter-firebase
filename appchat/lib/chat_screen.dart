@@ -26,20 +26,38 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _sendMessage({String? text, XFile? imageFile}) async {
+    Map<String, dynamic> data = {};
 
     if (imageFile != null) {
+      print("IMAGE FILE : $imageFile");
+      // DatabaseReference ref = FirebaseDatabase.instance.ref();
+      // ref.child(DateTime.now().millisecondsSinceEpoch.toString());
+      // UploadTask uploadTask = ref.set(File(imageFile.path));
+      // TaskSnapshot taskSnapshot = await uploadTask;
+      // var dowurl = await taskSnapshot.ref.getDownloadURL();
+      // var url = dowurl.toString();
+      // }
+
+      // var path = File(imageFile.path);
+      // Reference reference = FirebaseStorage.instance.ref();
+      //
+      // UploadTask task = reference
+      //     .child(DateTime.now().millisecondsSinceEpoch.toString())
+      //     .putFile(path);
+      // TaskSnapshot taskSnapshot = task.snapshot;
+      // String url = await taskSnapshot.ref.getDownloadURL();
 
       Reference reference = FirebaseStorage.instance.ref();
-      UploadTask task = reference
+      final TaskSnapshot snapshot = await reference
           .child(DateTime.now().millisecondsSinceEpoch.toString())
           .putFile(File(imageFile.path));
-      TaskSnapshot taskSnapshot = task.snapshot;
-      String url = await taskSnapshot.ref.getDownloadURL();
-
-      print("aqui o download link $url");
-
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      data["imageUrl"] = downloadUrl;
     }
 
-    FirebaseDatabase.instance.ref("messages").set({"text": text});
+    if(text != null) data["text"] = text;
+
+    FirebaseDatabase.instance.ref("messages").set(data);
+
   }
 }

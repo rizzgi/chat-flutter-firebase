@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:appchat/text_composer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -75,6 +76,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (text != null) data["text"] = text;
 
-    FirebaseDatabase.instance.ref("messages").set(data);
+    FirebaseFirestore.instance.collection("messages").add(data);
   }
 }

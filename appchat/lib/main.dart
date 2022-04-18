@@ -6,12 +6,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  runApp(MaterialApp(
-    title: "Chat With Flutter",
-    debugShowCheckedModeBanner: false,
-    home: const ChatScreen(),
-    theme: ThemeData(
-        primarySwatch: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.blue)),
+  runApp(MediaQuery(
+    data: const MediaQueryData(),
+    child: MaterialApp(
+      title: "Chat With Flutter",
+      debugShowCheckedModeBanner: false,
+      home: const ChatScreen(),
+      theme: ThemeData(
+          primarySwatch: Colors.blue,
+          iconTheme: const IconThemeData(color: Colors.blue)),
+    ),
   ));
 }

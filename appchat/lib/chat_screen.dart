@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:appchat/text_composer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,36 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Text("Olá"),
         elevation: 2,
       ),
-      body: TextComposer(_sendMessage),
+      body: Column(
+        children: [
+          Expanded(child:
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection("messages").snapshots(),
+            builder: (context, snapshot) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.none:
+                case ConnectionState.waiting:
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                default:
+                  List<DocumentChange?>? documents= snapshot.data?.docs.map((doc) => doc.data()).cast<DocumentChange<Object?>?>().toList();
+
+                  return ListView.builder(
+                      itemCount: documents?.length,
+                      reverse: true,
+                      itemBuilder: (context, index) {
+                        print("AQUUIII ${documents}");
+                        return ListTile(
+                          title: Text(documents?[index]?.doc["text"] ?? "aaaa"),
+                        );
+                      });
+              }
+            },
+          ),),
+          TextComposer(_sendMessage),
+        ],
+      ),
     );
   }
 
@@ -29,35 +59,22 @@ class _ChatScreenState extends State<ChatScreen> {
     Map<String, dynamic> data = {};
 
     if (imageFile != null) {
-      print("IMAGE FILE : $imageFile");
-      // DatabaseReference ref = FirebaseDatabase.instance.ref();
-      // ref.child(DateTime.now().millisecondsSinceEpoch.toString());
-      // UploadTask uploadTask = ref.set(File(imageFile.path));
-      // TaskSnapshot taskSnapshot = await uploadTask;
-      // var dowurl = await taskSnapshot.ref.getDownloadURL();
-      // var url = dowurl.toString();
-      // }
-
-      // var path = File(imageFile.path);
-      // Reference reference = FirebaseStorage.instance.ref();
-      //
-      // UploadTask task = reference
-      //     .child(DateTime.now().millisecondsSinceEpoch.toString())
-      //     .putFile(path);
-      // TaskSnapshot taskSnapshot = task.snapshot;
-      // String url = await taskSnapshot.ref.getDownloadURL();
+      print("IMAGE FILE : ${imageFile.toString()}");
 
       Reference reference = FirebaseStorage.instance.ref();
       final TaskSnapshot snapshot = await reference
-          .child(DateTime.now().millisecondsSinceEpoch.toString())
+          .child(DateTime
+          .now()
+          .millisecondsSinceEpoch
+          .toString())
           .putFile(File(imageFile.path));
       final downloadUrl = await snapshot.ref.getDownloadURL();
       data["imageUrl"] = downloadUrl;
     }
+    print("TEXT UP FIREBASE : ${text}");
 
-    if(text != null) data["text"] = text;
+    if (text != null) data["text"] = text;
 
     FirebaseDatabase.instance.ref("messages").set(data);
-
   }
 }

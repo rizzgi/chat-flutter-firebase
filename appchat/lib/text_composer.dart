@@ -22,9 +22,10 @@ class _TextComposerState extends State<TextComposer> {
       child: Row(
         children: [
           IconButton(onPressed: () async {
-            final XFile imageFile = (await ImagePicker().pickImage(source: ImageSource.camera)) as XFile;
+            XFile imageFile = (await ImagePicker().pickImage(source: ImageSource.camera)) as XFile;
             if(imageFile == null) return;
             widget.sendMessage(imageFile: imageFile);
+            print("WIDGET SEND MESSAGE ${widget.sendMessage(imageFile: imageFile)}");
           }, icon: const Icon(Icons.photo_camera)),
           Expanded(
             child: TextField(

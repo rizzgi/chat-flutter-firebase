@@ -40,6 +40,7 @@ dependencies:
   firebase_storage: ^10.2.12
   cloud_firestore: ^3.1.12
   firebase_auth: ^3.3.14
+  google_sign_in: ^5.3.0
 
 
 dev_dependencies:

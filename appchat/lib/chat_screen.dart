@@ -120,8 +120,9 @@ class _ChatScreenState extends State<ChatScreen> {
     if (imageFile != null) {
       //inicia um instancia no banco de storage
       Reference reference = FirebaseStorage.instance.ref();
+
       final TaskSnapshot snapshot = await reference
-          .child(DateTime.now().millisecondsSinceEpoch.toString())
+          .child(user!.uid + DateTime.now().millisecondsSinceEpoch.toString())
           .putFile(File(imageFile.path));
 
       setState(() {

@@ -21,13 +21,16 @@ class _ChatScreenState extends State<ChatScreen> {
   User? _currentUser;
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     //busca em Auth no firebase se há usuários, e preenche em _currentUser o usuário que se encontra logado no app.
     FirebaseAuth.instance.authStateChanges().listen((user) {
-      _currentUser = user!;
+      setState(() {
+        _currentUser = user!;
+      });
     });
   }
 
@@ -36,8 +39,24 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       key: _scaffoldState,
       appBar: AppBar(
-        title: Text("Olá"),
+        centerTitle: true,
+        title: Text(_currentUser != null
+            ? "Olá ${_currentUser?.displayName}".toUpperCase()
+            : "Chat App", maxLines: 1),
         elevation: 2,
+        actions: [
+          _currentUser != null
+              ? IconButton(
+                  icon: Icon(Icons.exit_to_app),
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+                    googleSignIn.signOut();
+                    _scaffoldState.currentState?.showSnackBar(
+                        const SnackBar(content: Text("Usuário deslogado.")));
+                  },
+                )
+              : Container()
+        ],
       ),
       body: Column(
         children: [
@@ -45,7 +64,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream:
                   //Dentro do banco, se instancia MESSAGES, que é onde ficarão arquivadas as mensagens
-                  FirebaseFirestore.instance.collection("messages").snapshots(),
+                  FirebaseFirestore.instance.collection("messages").orderBy("time").snapshots(),
               builder: (context, snapshot) {
                 //snapshot está verificando se houve conexao
                 switch (snapshot.connectionState) {
@@ -65,13 +84,15 @@ class _ChatScreenState extends State<ChatScreen> {
                         reverse: true,
                         itemBuilder: (context, index) {
                           print("AQUUIII ${documents}");
-                          return ChatMessage(documents?[index]?.data()
-                              as Map<String, dynamic>);
+                          return ChatMessage(
+                              documents?[index]?.data() as Map<String, dynamic>,
+                              documents?[index]?["uid"] == _currentUser?.uid);
                         });
                 }
               },
             ),
           ),
+          _isLoading ? LinearProgressIndicator() : Container(),
           //funcao que envia para a classe TextComposer os dados da msg que são enviados
           TextComposer(_sendMessage),
         ],
@@ -93,6 +114,7 @@ class _ChatScreenState extends State<ChatScreen> {
       "uid": user?.uid,
       "senderName": user?.displayName,
       "senderPhotoUrl": user?.photoURL,
+      "time": Timestamp.now()
     };
 
     if (imageFile != null) {
@@ -101,8 +123,17 @@ class _ChatScreenState extends State<ChatScreen> {
       final TaskSnapshot snapshot = await reference
           .child(DateTime.now().millisecondsSinceEpoch.toString())
           .putFile(File(imageFile.path));
+
+      setState(() {
+        _isLoading = true;
+      });
+
       String downloadUrl = await snapshot.ref.getDownloadURL();
       data["imageUrl"] = downloadUrl;
+
+      setState(() {
+        _isLoading = false;
+      });
     }
     if (text != null) data["text"] = text;
     FirebaseFirestore.instance.collection("messages").add(data);
